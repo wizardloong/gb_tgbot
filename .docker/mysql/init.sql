@@ -1,0 +1,2 @@
+CREATE DATABASE IF NOT EXISTS gb_tgbot;
+USE gb_tgbot;
