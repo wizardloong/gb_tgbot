@@ -5,6 +5,8 @@ services:
     build:
       context: ../
       dockerfile: .docker/Dockerfile
+      args:
+        APP_ENV: ${APP_ENV}
     container_name: gb_tgbot-app
     restart: on-failure
     working_dir: /app  # Явно указываем рабочий   
@@ -18,7 +20,6 @@ services:
       - ../:/app
     networks:
       - bot_network
-    command: ["sh", "-c", "ls -la /usr/local/bin && /usr/local/bin/main"]
 
   db:
     image: mysql:8.0

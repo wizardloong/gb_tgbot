@@ -5,20 +5,27 @@ FROM golang:1.21-alpine AS builder
 WORKDIR /app
 
 # Install dependencies
-COPY ../go.mod .
-RUN go mod download
+COPY ../source/go.mod ../source/
+RUN go mod tidy
 
 # Copy Project files
 COPY ../ .
 
-# Compile executable
-RUN go build -v -o /usr/local/bin/main .
+# Устанавливаем переменную окружения (по умолчанию - development)
+ARG APP_ENV
+ENV APP_ENV=${APP_ENV}
+
+RUN echo "$APP_ENV"
+
+# Билдим бинарник только в продакшене
+RUN if [ "$APP_ENV" = "production" ]; then go build -v -o /usr/local/bin/main ./source; fi
+
 
 # Stage Running
-FROM alpine:latest
+FROM golang:1.21-alpine
 
 # Copy binary from builder
-COPY --from=builder /usr/local/bin/main /usr/local/bin/main
+RUN if [ "$APP_ENV" = "production" ]; then cp /usr/local/bin/main /usr/local/bin/main; fi || true
 
 # Check if main binanary exists
 RUN ls -la /usr/local/bin/main && \
@@ -28,5 +35,12 @@ RUN ls -la /usr/local/bin/main && \
 # Set workdir for application
 WORKDIR /app
 
+# Устанавливаем переменную окружения (по умолчанию - development)
+ARG APP_ENV
+ENV APP_ENV=${APP_ENV}
+RUN echo "$APP_ENV"
+
+COPY . .
+
 # Run script from /usr/local/bin
-CMD ["/bin/sh", "-c", "cd /app && /usr/local/bin/main"]
+CMD ["/bin/sh", "-c", "if [ \"$APP_ENV\" = \"production\" ]; then /usr/local/bin/main; else go run ./source/; fi"]
