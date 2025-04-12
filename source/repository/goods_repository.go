@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"telegram-bot/internal/domain"
+	"gb_tgbot/domain"
 
 	"gorm.io/gorm"
 )

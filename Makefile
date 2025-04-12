@@ -26,3 +26,16 @@ debugshell:
 
 dev:
 	docker compose -f .docker/docker-compose.yml up --build
+
+# usage: make newmigration name=hello_new_table
+newmigration:
+	docker compose -f .docker/docker-compose.yml exec app migrate create -ext sql -dir migrations -seq "$(name)"
+
+# runs migrations
+migrate:
+	docker compose -f .docker/docker-compose.yml exec app migrate -path=migrations -database "mysql://user:pass@tcp(db:3306)/mydb?multiStatements=true" up
+
+
+# rollbacks migrations
+unmigrate:
+	docker compose -f .docker/docker-compose.yml exec app migrate -path=migrations -database "mysql://user:pass@tcp(db:3306)/mydb?multiStatements=true" down

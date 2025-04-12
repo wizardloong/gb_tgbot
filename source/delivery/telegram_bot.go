@@ -2,10 +2,9 @@ package delivery
 
 import (
 	"fmt"
-	"log"
 	"strconv"
-	"telegram-bot/internal/domain"
-	"telegram-bot/internal/repository"
+	"gb_tgbot/domain"
+	"gb_tgbot/repository"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )

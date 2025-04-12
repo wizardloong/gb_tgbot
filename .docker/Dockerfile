@@ -24,8 +24,28 @@ RUN if [ "$APP_ENV" = "production" ]; then go build -v -o /usr/local/bin/main ./
 # Stage Running
 FROM golang:1.21-alpine
 
+# Устанавливаем Git и зависимости
+# RUN apk add --no-cache git
+
+# # Проверяем версию Git (опционально)
+# RUN git --version
+
 # Copy binary from builder
 RUN if [ "$APP_ENV" = "production" ]; then cp /usr/local/bin/main /usr/local/bin/main; fi || true
+
+# Установка зависимостей для MySQL (если нужны)
+# RUN apk add --no-cache gcc musl-dev git
+
+#RUN go install -tags 'mysql' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
+# Устанавливаем curl и распаковываем migrate
+RUN apk add --no-cache curl tar \
+    && curl -L https://github.com/golang-migrate/migrate/releases/download/v4.16.2/migrate.linux-amd64.tar.gz | tar xvz -C /usr/local/bin
+
+
+# Добавление бинарника migrate в PATH (опционально)
+ENV PATH=$PATH:/go/bin
+
 
 # Check if main binanary exists
 RUN ls -la /usr/local/bin/main && \
@@ -43,4 +63,4 @@ RUN echo "$APP_ENV"
 COPY . .
 
 # Run script from /usr/local/bin
-CMD ["/bin/sh", "-c", "if [ \"$APP_ENV\" = \"production\" ]; then /usr/local/bin/main; else go run ./source/; fi"]
+CMD ["/bin/sh", "-c", "if [ \"$APP_ENV\" = \"production\" ]; then /usr/local/bin/main; else cd source && go run .; fi"]
